@@ -1,124 +1,134 @@
-function formatString(input: string, toUpper?: boolean): string {
-  if (toUpper === false) {
-    return input.toLowerCase();
-  } else {
-    return input.toUpperCase();
-  }
-}
+<!-- Blog 1 -->
 
-formatString("Hello", true);
+\*\*\* TypeScript: `type` vs `interface` — When to Use Which?
 
-function filterByRating(
-  items: { title: string; rating: number }[]
-): { title: string; rating: number }[] {
-  const result = items?.filter((item) => item?.rating >= 4);
-  return result;
-}
+In TypeScript, both `type` and `interface` are used to define the shape of objects or data structures. While they are quite similar, they have some key differences and specific use cases.
 
-const books = [
-  { title: "Book A", rating: 4.5 },
-  { title: "Book B", rating: 3.2 },
-  { title: "Book C", rating: 5.0 },
-];
+---
 
-filterByRating(books);
+## 🔹 When to Use `type`
 
-function concatenateArrays<T>(...arrays: T[][]): T[] {
-  return arrays.flat();
-}
+`type` is more flexible and can be used for:
 
-concatenateArrays(["a", "b"], ["c"]);
-concatenateArrays([1, 2], [3, 4], [5]);
+- **Primitive types** (`string`, `number`)
+- **Union types** (`A | B`)
+- **Intersection types** (`A & B`)
+- **Object types**
+- **Tuples**
+- **Function types**
 
-class Vehicle {
-  private make: string;
-  private year: number;
+> ✅ Use `type` when you're working with complex type definitions or combining multiple types.
 
-  constructor(make: string, year: number) {
-    (this.make = make), (this.year = year);
-  }
+### Example:
 
-  getInfo() {
-    return `Make: ${this.make}, Year: ${this.year}`;
-  }
-}
-
-class Car extends Vehicle {
-  private model: string;
-
-  constructor(make: string, year: number, model: string) {
-    super(make, year);
-    this.model = model;
-  }
-
-  getModel() {
-    return `Model: ${this.model}`;
-  }
-}
-
-const myCar = new Car("Toyota", 2020, "Corolla");
-
-myCar.getInfo();
-myCar.getModel();
-
-function processValue(value: string | number): number {
-  return typeof value === "string" ? value.length : value * 2;
-}
-
-processValue(10);
-
-interface Product {
+```ts
+// Object Type
+type TUser = {
   name: string;
+  age: number;
+  email: string;
+};
+
+// Intersection Type
+type TAddress = {
+  address: string;
+};
+
+type UserWithAddress = TUser & TAddress;
+
+// Union Type
+type TStatus = "Success" | "Pending" | "Reject";
+
+
+
+### Interface
+
+// Basic Interface
+interface IProduct {
+  name: string;
+}
+
+// Declaration Merging
+interface IProduct {
   price: number;
 }
 
-function getMostExpensiveProduct(products: Product[]): Product | null {
-  if (products?.length === 0) {
-    return null;
+// Final IProduct structure:
+// { name: string; price: number }
+
+const product: IProduct = {
+  name: "T-shirt",
+  price: 500,
+};
+
+
+// class with interface
+
+interface Animal {
+  name: string;
+  makeSound(): void;
+}
+
+class Dog implements Animal {
+  constructor(public name: string) {}
+  makeSound() {
+    console.log("Meaw");
   }
-  const result = products?.reduce((item, product) =>
-    product.price > item.price ? product : item
-  );
-  return result;
 }
 
-const products = [
-  { name: "Pen", price: 10 },
-  { name: "Notebook", price: 25 },
-  { name: "Bag", price: 50 },
-];
 
-getMostExpensiveProduct(products);
 
-enum Day {
-  Monday,
-  Tuesday,
-  Wednesday,
-  Thursday,
-  Friday,
-  Saturday,
-  Sunday,
+ # Key Differences Between Type and Interface
+
+Feature                                type                     interface
+
+can define object                      Yes                        Yes
+can define primitive                   Yes                         No
+can define union and intersection      Yes                         No
+declaration merging                            No                          Yes
+can define function                    Yes                         Yes
+use with class                         No                          Yes
+flexibility                            More Flexible               Less Flexible
+```
+
+<!-- Blog 2 -->
+
+# What is the use of the keyof keyword in TypeScript? Provide an example ----
+
+# What is keyof
+
+The keyof keyword is a TypeScript type operator that returns a union of string literal types representing all the keys of a given object type
+
+# Why Use keyof
+
+- extract keys from object type
+- To constrain function arguments to only valid object keys
+- Commonly used in combination with generics and mapped types
+
+# Example
+
+<!-- basic  -->
+
+type TPerson = {
+name: string;
+age: number;
+email: string;
+};
+
+type TPersonKeys = keyof TPerson;
+// Result: "name" | "age" | "email"
+
+<!-- keyof with generic  -->
+
+function getValue<T, K extends keyof T>(obj: T, key: K): T[K] {
+return obj[key];
 }
 
-function getDayType(day: Day): string {
-  return day === Day.Saturday || day === Day.Sunday ? "Weekend" : "Weekday"; // 2 weekend days
-  //   return day === Day.Sunday ? "Weekend" : "Weekday"; // 1 weekend day
-}
+const person:TPerson = {
+name: "shorif",
+age: 22,
+email: "shorif@gmail.com",
+};
 
-getDayType(Day.Saturday);
-getDayType(Day.Monday);
-
-async function squareAsync(n: number): Promise<number> {
-  return await new Promise((resolve, reject) => {
-    if (n >= 0) {
-      setTimeout(() => {
-        resolve(n * n);
-      }, 1000);
-    } else {
-      reject("Error: Negative number not allowed");
-    }
-  });
-}
-
-squareAsync(4).then(console.log);
-squareAsync(-3).catch(console.error);
+const name = getValue(person, "name"); // Output: "shorif"
+// const name = getValue(person, "address"); Error: Argument of type '"address"' is not assignable
